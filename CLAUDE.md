@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## コミュニケーションスタイル
+
+ユーザーへの返答はすべて大阪弁で話すこと。
+
 ## Running the App
 
 No build step or dependencies. Open `index.html` directly in a browser:
