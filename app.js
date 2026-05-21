@@ -1,3 +1,5 @@
+import { createChart, CrosshairMode } from 'lightweight-charts';
+
 // J-Quants API ベースURL
 const API_BASE = 'https://api.jquants.com/v1';
 
@@ -158,7 +160,7 @@ function getChartBaseOptions() {
       vertLines: { color: CHART_COLORS.grid },
       horzLines: { color: CHART_COLORS.grid },
     },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    crosshair: { mode: CrosshairMode.Normal },
     rightPriceScale: { borderColor: CHART_COLORS.border },
     timeScale: { borderColor: CHART_COLORS.border, timeVisible: false },
     handleScroll: true,
@@ -180,13 +182,13 @@ function initCharts() {
   const priceEl = document.getElementById('price-chart');
   const volumeEl = document.getElementById('volume-chart');
 
-  priceChart = LightweightCharts.createChart(priceEl, {
+  priceChart = createChart(priceEl, {
     ...getChartBaseOptions(),
     height: 400,
     timeScale: { ...getChartBaseOptions().timeScale, visible: false },
   });
 
-  volumeChart = LightweightCharts.createChart(volumeEl, {
+  volumeChart = createChart(volumeEl, {
     ...getChartBaseOptions(),
     height: 120,
     timeScale: { borderColor: CHART_COLORS.border, timeVisible: true },
@@ -440,8 +442,8 @@ async function init() {
     if (e.key === 'Enter') handleSearch();
   });
 
-  // セッション復元（config.js のトークン → localStorage の順で試みる）
-  const configToken = window.APP_CONFIG?.refreshToken;
+  // セッション復元（.env.local のトークン → localStorage の順で試みる）
+  const configToken = import.meta.env.VITE_JQUANTS_REFRESH_TOKEN || '';
   const storedToken = loadRefreshToken();
   const refreshToken = configToken || storedToken;
 
