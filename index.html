@@ -3,26 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>アラーム</title>
+  <title>株価分析 - J-Quants</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <div class="clock" id="clock">00:00:00</div>
 
-    <div class="alarm-section">
-      <label for="alarm-time">アラーム時刻</label>
-      <input type="time" id="alarm-time" step="60">
+  <!-- ログイン画面 -->
+  <div id="login-screen" class="screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#6366f1"/>
+          <polyline points="6,30 14,20 20,25 28,12 34,18" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>株価分析</h1>
+      </div>
+      <p class="login-subtitle">J-Quants API で日本株を分析</p>
+      <div class="form-group">
+        <label for="email-input">メールアドレス</label>
+        <input type="email" id="email-input" placeholder="email@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="password-input">パスワード</label>
+        <input type="password" id="password-input" placeholder="パスワード" autocomplete="current-password">
+      </div>
+      <button id="login-btn" class="btn btn-primary btn-full">ログイン</button>
+      <div id="login-error" class="error-msg hidden"></div>
+      <p class="login-note">J-Quants のアカウントでログインしてください。<br><a href="https://jpx-jquants.com/" target="_blank" rel="noopener">アカウント登録はこちら</a></p>
     </div>
-
-    <div class="buttons">
-      <button id="set-btn" class="btn btn-primary">セット</button>
-      <button id="stop-btn" class="btn btn-danger" disabled>止める</button>
-    </div>
-
-    <div class="status" id="status">アラーム未設定</div>
   </div>
 
+  <!-- メインアプリ -->
+  <div id="app-screen" class="screen hidden">
+    <header class="app-header">
+      <div class="header-brand">
+        <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#6366f1"/>
+          <polyline points="6,30 14,20 20,25 28,12 34,18" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-name">株価分析</span>
+        <span class="brand-sub">Powered by J-Quants</span>
+      </div>
+      <button id="logout-btn" class="btn btn-ghost">ログアウト</button>
+    </header>
+
+    <main class="app-main">
+
+      <!-- 検索パネル -->
+      <section class="search-panel">
+        <div class="search-row">
+          <div class="input-group">
+            <label for="stock-code">銘柄コード</label>
+            <input type="text" id="stock-code" placeholder="例: 7203" maxlength="5" inputmode="numeric">
+          </div>
+          <div class="input-group">
+            <label for="date-from">開始日</label>
+            <input type="date" id="date-from">
+          </div>
+          <div class="input-group">
+            <label for="date-to">終了日</label>
+            <input type="date" id="date-to">
+          </div>
+          <button id="search-btn" class="btn btn-primary search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            検索
+          </button>
+        </div>
+        <div class="quick-range">
+          <button class="range-btn" data-days="30">1ヶ月</button>
+          <button class="range-btn" data-days="90">3ヶ月</button>
+          <button class="range-btn active" data-days="180">6ヶ月</button>
+          <button class="range-btn" data-days="365">1年</button>
+          <button class="range-btn" data-days="730">2年</button>
+        </div>
+      </section>
+
+      <!-- ローディング -->
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>データを取得中...</p>
+      </div>
+
+      <!-- エラー -->
+      <div id="app-error" class="error-panel hidden"></div>
+
+      <!-- 銘柄情報 -->
+      <section id="stock-info" class="stock-info hidden">
+        <div class="stock-header">
+          <div class="stock-title">
+            <h2 id="company-name">―</h2>
+            <div class="stock-tags">
+              <span id="stock-code-tag" class="tag tag-code"></span>
+              <span id="market-tag" class="tag tag-market"></span>
+              <span id="sector-tag" class="tag tag-sector"></span>
+            </div>
+          </div>
+          <div class="stock-price-main">
+            <span id="current-price" class="price-big">―</span>
+            <span id="price-change" class="price-delta">―</span>
+          </div>
+        </div>
+        <div class="stock-metrics">
+          <div class="metric">
+            <span class="metric-label">始値</span>
+            <span id="open-price" class="metric-value">―</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">高値</span>
+            <span id="high-price" class="metric-value up">―</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">安値</span>
+            <span id="low-price" class="metric-value down">―</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">出来高</span>
+            <span id="volume-display" class="metric-value">―</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">売買代金</span>
+            <span id="turnover-display" class="metric-value">―</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- チャートエリア -->
+      <section id="chart-container" class="chart-container hidden">
+        <div class="chart-header">
+          <span class="chart-title">価格チャート（ローソク足）</span>
+          <div class="ma-toggles">
+            <label class="ma-label">
+              <input type="checkbox" id="ma5" checked>
+              <span class="ma-dot ma5"></span>MA5
+            </label>
+            <label class="ma-label">
+              <input type="checkbox" id="ma25" checked>
+              <span class="ma-dot ma25"></span>MA25
+            </label>
+            <label class="ma-label">
+              <input type="checkbox" id="ma75" checked>
+              <span class="ma-dot ma75"></span>MA75
+            </label>
+          </div>
+        </div>
+        <div id="price-chart" class="chart-pane"></div>
+        <div class="chart-header volume-header">
+          <span class="chart-title">出来高</span>
+        </div>
+        <div id="volume-chart" class="chart-pane volume-pane"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
