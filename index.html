@@ -7,20 +7,43 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <div class="clock" id="clock">00:00:00</div>
+  <div class="app">
+    <header class="header">
+      <div class="clock-wrap">
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="date" id="date"></div>
+      </div>
+    </header>
 
-    <div class="alarm-section">
-      <label for="alarm-time">アラーム時刻</label>
-      <input type="time" id="alarm-time" step="60">
+    <main class="main">
+      <section class="add-section card">
+        <h2 class="section-title">アラーム追加</h2>
+        <div class="add-row">
+          <input type="time" id="alarm-time" step="60">
+          <button id="add-btn" class="btn btn-primary">+ 追加</button>
+        </div>
+      </section>
+
+      <section class="list-section">
+        <h2 class="section-title">アラーム一覧</h2>
+        <ul class="alarm-list" id="alarm-list">
+          <li class="empty-msg" id="empty-msg">アラームが登録されていません</li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- リング中オーバーレイ -->
+    <div class="overlay hidden" id="overlay">
+      <div class="overlay-card">
+        <div class="overlay-icon">⏰</div>
+        <div class="overlay-time" id="overlay-time"></div>
+        <div class="overlay-label" id="overlay-label"></div>
+        <div class="overlay-buttons">
+          <button class="btn btn-snooze" id="snooze-btn">スヌーズ（5分）</button>
+          <button class="btn btn-stop" id="stop-btn">止める</button>
+        </div>
+      </div>
     </div>
-
-    <div class="buttons">
-      <button id="set-btn" class="btn btn-primary">セット</button>
-      <button id="stop-btn" class="btn btn-danger" disabled>止める</button>
-    </div>
-
-    <div class="status" id="status">アラーム未設定</div>
   </div>
 
   <script src="app.js"></script>
