@@ -440,11 +440,15 @@ async function init() {
     if (e.key === 'Enter') handleSearch();
   });
 
-  // セッション復元
-  const refreshToken = loadRefreshToken();
+  // セッション復元（config.js のトークン → localStorage の順で試みる）
+  const configToken = window.APP_CONFIG?.refreshToken;
+  const storedToken = loadRefreshToken();
+  const refreshToken = configToken || storedToken;
+
   if (refreshToken) {
     try {
       idToken = await apiGetIdToken(refreshToken);
+      if (configToken) saveRefreshToken(configToken);
       showAppScreen();
     } catch {
       clearTokens();
